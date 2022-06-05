@@ -11,5 +11,5 @@ public final class AbsjustPlugin {
     @Getter private final static AbsjustPlugin instance = new AbsjustPlugin();
     @Getter private static final Logger logger = LogManager.getLogger("AbsjustCore");
 
-    @Getter @Setter private Provider provider;
+    @Getter @Setter private static Provider provider;
 }

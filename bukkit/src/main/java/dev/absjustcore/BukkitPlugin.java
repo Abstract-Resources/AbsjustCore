@@ -38,13 +38,13 @@ public final class BukkitPlugin extends JavaPlugin {
                 .build()
         );
 
-        AbsjustPlugin.getInstance().setProvider(provider);
+        AbsjustPlugin.setProvider(provider);
 
         GroupFactory.getInstance().init();
     }
 
     public void onDisable() {
-        Provider provider = AbsjustPlugin.getInstance().getProvider();
+        Provider provider = AbsjustPlugin.getProvider();
 
         if (provider != null) provider.close();
     }

@@ -19,7 +19,7 @@ public final class GroupFactory {
     @Getter private final static GroupFactory instance = new GroupFactory();
 
     public void init() {
-        LocalResultSet resultSet = AbsjustPlugin.getInstance().getProvider().fetch(StoreMeta.builder()
+        LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("groups")
                 .statement("GROUPS_SELECT_ALL")
                 .build()
@@ -45,7 +45,7 @@ public final class GroupFactory {
     }
 
     public @Nullable Group storeGroup(@NonNull String name, int priority) {
-        int id = AbsjustPlugin.getInstance().getProvider().storeAndFetch(StoreMeta.builder()
+        int id = AbsjustPlugin.getProvider().storeAndFetch(StoreMeta.builder()
                 .append("name", name)
                 .append("priority", priority)
                 .build()
@@ -63,7 +63,7 @@ public final class GroupFactory {
     }
 
     public Group loadGroup(@NonNull String name) {
-        LocalResultSet resultSet = AbsjustPlugin.getInstance().getProvider().fetch(StoreMeta.builder()
+        LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("groups")
                 .statement("GROUP_SELECT")
                 .append("name", name) // TODO: here i need specify the index "name" because is needed with mongodb
