@@ -1,8 +1,7 @@
 package dev.absjustcore.provider;
 
+import dev.absjustcore.provider.utils.LocalResultSet;
 import dev.absjustcore.provider.utils.StoreMeta;
-
-import java.util.Map;
 
 public interface Provider {
 
@@ -10,7 +9,9 @@ public interface Provider {
 
     void store(StoreMeta storeMeta);
 
-    Object fetch(StoreMeta storeMeta);
+    int storeAndFetch(StoreMeta storeMeta);
+
+    LocalResultSet fetch(StoreMeta storeMeta);
 
     void close();
 }

@@ -96,8 +96,38 @@ public final class MysqlProvider implements Provider {
         }
     }
 
+    public int storeAndFetch(StoreMeta storeMeta) {
+        if (this.disconnected()) return this.reconnect() ? this.storeAndFetch(storeMeta) : -1;
+
+        String sql = storeMeta.getStatement();
+
+        if (!this.statements.containsKey(sql)) {
+            throw new RuntimeException("Statement " + sql + " not found");
+        }
+
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(this.statements.get(sql))) {
+                this.set(preparedStatement, storeMeta.getValues().values());
+
+                preparedStatement.executeUpdate();
+
+                storeMeta.invalidate();
+
+                ResultSet rs = preparedStatement.getGeneratedKeys();
+
+                if (rs.next()) {
+                    return rs.getInt(0);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
     @Override
-    public Object fetch(StoreMeta storeMeta) {
+    public LocalResultSet fetch(StoreMeta storeMeta) {
         if (this.disconnected()) return this.reconnect() ? this.fetch(storeMeta) : null;
 
         String sql = storeMeta.getStatement();

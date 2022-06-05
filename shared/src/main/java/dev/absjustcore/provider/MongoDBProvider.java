@@ -54,6 +54,19 @@ public final class MongoDBProvider implements Provider {
     }
 
     @Override
+    public int storeAndFetch(StoreMeta storeMeta) {
+        MongoCollection<Document> collection = this.collectionsStored.getOrDefault(storeMeta.getCollection(), null);
+
+        if (collection == null) return -1;
+
+        Document document = new Document(storeMeta.getValues());
+
+        collection.replaceOne(new Document(storeMeta.fetchFirstValues(1)), document);
+
+        return document.getObjectId("_id").getTimestamp();
+    }
+
+    @Override
     public LocalResultSet fetch(StoreMeta storeMeta) {
         try {
             MongoCollection<Document> collection = this.collectionsStored.getOrDefault(storeMeta.getCollection(), null);

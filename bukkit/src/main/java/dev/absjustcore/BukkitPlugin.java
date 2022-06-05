@@ -1,5 +1,6 @@
 package dev.absjustcore;
 
+import dev.absjustcore.factory.GroupFactory;
 import dev.absjustcore.provider.MongoDBProvider;
 import dev.absjustcore.provider.MysqlProvider;
 import dev.absjustcore.provider.Provider;
@@ -38,6 +39,8 @@ public final class BukkitPlugin extends JavaPlugin {
         );
 
         AbsjustPlugin.getInstance().setProvider(provider);
+
+        GroupFactory.getInstance().init();
     }
 
     public void onDisable() {
