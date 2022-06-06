@@ -1,6 +1,9 @@
 package dev.absjustcore.commands.group;
 
+import dev.absjustcore.actionlog.LogManager;
+import dev.absjustcore.actionlog.LoggedAction;
 import dev.absjustcore.command.AbstractArgument;
+import dev.absjustcore.factory.GroupFactory;
 import dev.absjustcore.object.Group;
 import dev.absjustcore.object.MetaData;
 import dev.absjustcore.sender.AbstractSender;
@@ -14,7 +17,7 @@ public final class SetPrefixArgument extends AbstractArgument<Group> {
     }
 
     @Override
-    public void execute(AbstractSender sender, String commandLabel, String argumentLabel, Group groupCache, String[] args) {
+    public void execute(AbstractSender sender, String commandLabel, String argumentLabel, Group group, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("COMMAND_INVALID_USAGE", commandLabel, argumentLabel);
 
@@ -33,7 +36,7 @@ public final class SetPrefixArgument extends AbstractArgument<Group> {
 
         if (priority < 0) priority = 0;
 
-        MetaData metaData = groupCache.getMetaData();
+        MetaData metaData = group.getMetaData();
 
         if (metaData.findPrefix(args[0])) {
             // TODO: Stuff
@@ -44,8 +47,21 @@ public final class SetPrefixArgument extends AbstractArgument<Group> {
         metaData.invalidatePrefix(args[0]);
         metaData.recalculate();
 
-        //GroupFactory.getInstance().storeMeta(groupCache.getRowId(), LoggedAction.Type.GROUP, "prefix", args[0]);
+        GroupFactory.getInstance().storeMetaData(
+                group.getId(),
+                LoggedAction.Type.GROUP,
+                "prefix",
+                args[0]
+        );
 
+        LogManager.getInstance().broadcast(LoggedAction.builder()
+                .timestamp()
+                .source(sender).target(group)
+                .type(LoggedAction.Type.GROUP)
+                .action("setprefix", args[0])
+                .build(),
+                sender
+        );
         // TODO: Send log action
     }
 }

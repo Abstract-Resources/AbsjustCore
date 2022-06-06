@@ -41,11 +41,12 @@ public final class CreateGroupArgument extends AbstractArgument<Void> {
 
             factory.setGroup(group);
 
-            LogManager.getInstance().broadcast(
-                    LoggedAction.builder().timestamp().source(sender).target(null, args[0])
-                            .type(LoggedAction.Type.GROUP)
-                            .action("create")
-                            .build(),
+            LogManager.getInstance().broadcast(LoggedAction.builder()
+                    .timestamp()
+                    .source(sender).target(group)
+                    .type(LoggedAction.Type.GROUP)
+                    .action("create")
+                    .build(),
                     sender
             );
         });
