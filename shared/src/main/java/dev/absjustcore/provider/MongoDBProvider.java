@@ -1,8 +1,6 @@
 package dev.absjustcore.provider;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import dev.absjustcore.AbsjustPlugin;
@@ -33,12 +31,18 @@ public final class MongoDBProvider implements Provider {
                 password.toCharArray()
         ) : null;
 
-        String[] addressSplit = storeMeta.fetchString("address").split(":");
+        String address = storeMeta.fetchString("address");
 
-        this.client = new MongoClient(
-                new ServerAddress(addressSplit[0], addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : ServerAddress.defaultPort()),
-                credential == null ? Collections.emptyList() : Collections.singletonList(credential)
-        );
+        if (address.startsWith(MongoURI.MONGODB_PREFIX) || address.startsWith("mongodb+srv://")) {
+            this.client = new MongoClient(new MongoClientURI(address));
+        } else {
+            String[] addressSplit = address.split(":");
+
+            this.client = new MongoClient(
+                    new ServerAddress(addressSplit[0], addressSplit.length > 1 ? Integer.parseInt(addressSplit[1]) : ServerAddress.defaultPort()),
+                    credential == null ? Collections.emptyList() : Collections.singletonList(credential)
+            );
+        }
 
         MongoDatabase database = this.client.getDatabase(storeMeta.fetchString("dbname"));
 

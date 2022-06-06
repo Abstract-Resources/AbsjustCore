@@ -64,8 +64,8 @@ public final class BukkitPlugin extends JavaPlugin {
 
         provider.init(StoreMeta.builder()
                 .append("address", section.getString("address"))
-                .append("password", section.getString("password"))
-                .append("username", section.getString("username"))
+                .append("password", section.getString("password", null))
+                .append("username", section.getString("username", null))
                 .append("dbname", section.getString("dbname"))
                 .build()
         );
