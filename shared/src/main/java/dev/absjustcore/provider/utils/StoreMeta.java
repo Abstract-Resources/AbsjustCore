@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,7 +57,7 @@ public final class StoreMeta {
         return (String) storeValue.getValue();
     }
 
-    public void invalidate() {
+    public void flush() {
         this.values.clear();
     }
 

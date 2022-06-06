@@ -30,7 +30,7 @@ public final class GroupFactory {
         );
 
         if (resultSet == null) {
-            AbsjustPlugin.getLogger().log(Level.FATAL, "Error trying fetch all groups and result received null");
+            AbsjustPlugin.getLogger().log(Level.FATAL, "Error trying fetch all groups because result received null");
 
             return;
         }

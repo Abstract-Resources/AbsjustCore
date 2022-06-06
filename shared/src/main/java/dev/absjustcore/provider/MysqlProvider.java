@@ -7,8 +7,10 @@ import dev.absjustcore.TaskUtils;
 import dev.absjustcore.provider.utils.LocalResultSet;
 import dev.absjustcore.provider.utils.StoreMeta;
 import dev.absjustcore.provider.utils.StoreValue;
+import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -95,7 +97,7 @@ public final class MysqlProvider implements Provider {
 
             this.dataSource.close();
         } finally {
-            storeMeta.invalidate();
+            storeMeta.flush();
         }
     }
 
@@ -129,14 +131,14 @@ public final class MysqlProvider implements Provider {
 
             this.dataSource.close();
         } finally {
-            storeMeta.invalidate();
+            storeMeta.flush();
         }
 
         return -1;
     }
 
     @Override
-    public LocalResultSet fetch(StoreMeta storeMeta) {
+    public @Nullable LocalResultSet fetch(@NonNull StoreMeta storeMeta) {
         if (this.disconnected()) return this.reconnect() ? this.fetch(storeMeta) : null;
 
         String sql = storeMeta.getStatement();
@@ -158,7 +160,7 @@ public final class MysqlProvider implements Provider {
 
             this.dataSource.close();
         } finally {
-            storeMeta.invalidate();
+            storeMeta.flush();
         }
 
         return null;

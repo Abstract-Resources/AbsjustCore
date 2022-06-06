@@ -100,7 +100,7 @@ public final class MongoDBProvider implements Provider {
 
             return LocalResultSet.fetch(document);
         } finally {
-            storeMeta.invalidate();
+            storeMeta.flush();
         }
     }
 
