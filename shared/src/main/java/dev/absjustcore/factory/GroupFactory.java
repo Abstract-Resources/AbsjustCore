@@ -58,8 +58,8 @@ public final class GroupFactory {
         int id = AbsjustPlugin.getProvider().storeAndFetch(StoreMeta.builder()
                 .collection("groups")
                 .statement("GROUP_INSERT")
-                .append("name", name)
-                .append("priority", priority)
+                .append(1, "name", name)
+                .append(2, "priority", priority)
                 .build()
         );
 
@@ -78,7 +78,7 @@ public final class GroupFactory {
         LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("groups")
                 .statement("GROUP_SELECT")
-                .append("name", name) // TODO: here i need specify the index "name" because is needed with mongodb
+                .append(1, "name", name) // TODO: here i need specify the index "name" because is needed with mongodb
                 .build()
         );
 
@@ -99,11 +99,11 @@ public final class GroupFactory {
         AbsjustPlugin.getProvider().storeAsync(StoreMeta.builder()
                 .collection("node_meta")
                 .statement("NODE_META_INSERT")
-                .append("targetId", targetId)
-                .append("type", type)
-                .append("context", context)
-                .append("value", value)
-                .append("created_at", Instant.now().getEpochSecond())
+                .append(1, "targetId", targetId)
+                .append(2, "type", type.toString())
+                .append(3, "context", context)
+                .append(4, "value", value)
+                .append(5, "created_at", Instant.now().getEpochSecond())
                 .build()
         );
     }
@@ -112,7 +112,7 @@ public final class GroupFactory {
         LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("node_meta")
                 .statement("NODE_META_SELECT_ALL_BY_TARGET_ID")
-                .append("targetId", targetId)
+                .append(1, "targetId", targetId)
                 .build()
         );
 
@@ -148,7 +148,7 @@ public final class GroupFactory {
         LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("permissions")
                 .statement("PERMISSIONS_SELECT_ALL")
-                .append("targetId", targetId)
+                .append(1, "targetId", targetId)
                 .build()
         );
 

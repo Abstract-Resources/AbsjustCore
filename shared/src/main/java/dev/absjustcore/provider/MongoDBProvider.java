@@ -61,7 +61,7 @@ public final class MongoDBProvider implements Provider {
 
         collection.replaceOne(
                 new Document(storeMeta.fetchFirstValues(1)),
-                new Document(storeMeta.getValues()).append("id", new ObjectId())
+                new Document(storeMeta.values()).append("id", new ObjectId())
         );
     }
 
@@ -80,7 +80,7 @@ public final class MongoDBProvider implements Provider {
 
         collection.replaceOne(
                 new Document(storeMeta.fetchFirstValues(1)),
-                new Document(storeMeta.getValues()).append("id", targetObjectId)
+                new Document(storeMeta.values()).append("id", targetObjectId)
         );
 
         return targetObjectId.getTimestamp();

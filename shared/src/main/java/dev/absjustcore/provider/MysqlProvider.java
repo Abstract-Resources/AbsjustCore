@@ -6,17 +6,13 @@ import dev.absjustcore.AbsjustPlugin;
 import dev.absjustcore.TaskUtils;
 import dev.absjustcore.provider.utils.LocalResultSet;
 import dev.absjustcore.provider.utils.StoreMeta;
+import dev.absjustcore.provider.utils.StoreValue;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
 
 public final class MysqlProvider implements Provider {
 
@@ -90,14 +86,16 @@ public final class MysqlProvider implements Provider {
 
         try (Connection connection = this.dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(this.statements.get(sql))) {
-                this.set(preparedStatement, storeMeta.getValues().values());
+                this.set(preparedStatement, storeMeta.listValues());
 
                 preparedStatement.executeUpdate();
-
-                storeMeta.invalidate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            AbsjustPlugin.getLogger().error("An error occurred when tried execute the SQL Query: " + sql, e);
+
+            this.dataSource.close();
+        } finally {
+            storeMeta.invalidate();
         }
     }
 
@@ -115,21 +113,23 @@ public final class MysqlProvider implements Provider {
         }
 
         try (Connection connection = this.dataSource.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(this.statements.get(sql))) {
-                this.set(preparedStatement, storeMeta.getValues().values());
+            try (PreparedStatement preparedStatement = connection.prepareStatement(this.statements.get(sql), Statement.RETURN_GENERATED_KEYS)) {
+                this.set(preparedStatement, storeMeta.listValues());
 
                 preparedStatement.executeUpdate();
 
-                storeMeta.invalidate();
-
-                ResultSet rs = preparedStatement.getGeneratedKeys();
-
-                if (rs.next()) {
-                    return rs.getInt(0);
+                try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(0);
+                    }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            AbsjustPlugin.getLogger().error("An error occurred when tried execute the SQL Query: " + sql, e);
+
+            this.dataSource.close();
+        } finally {
+            storeMeta.invalidate();
         }
 
         return -1;
@@ -147,16 +147,18 @@ public final class MysqlProvider implements Provider {
 
         try (Connection connection = this.dataSource.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(this.statements.get(sql))) {
-                this.set(preparedStatement, storeMeta.getValues().values());
-
-                storeMeta.invalidate();
+                this.set(preparedStatement, storeMeta.listValues());
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     return LocalResultSet.fetch(resultSet);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            AbsjustPlugin.getLogger().error("An error occurred when tried execute the SQL Query: " + sql, e);
+
+            this.dataSource.close();
+        } finally {
+            storeMeta.invalidate();
         }
 
         return null;
@@ -194,16 +196,19 @@ public final class MysqlProvider implements Provider {
         this.statements.clear();
     }
 
-    private void set(PreparedStatement preparedStatement, Object... args) throws SQLException {
-        for (int i = 1; i <= args.length; i++) {
-            Object result = args[i - 1];
+    private void set(PreparedStatement preparedStatement, Set<StoreValue> values) throws SQLException {
+        for (StoreValue value : values) {
+            int index = value.getId();
+            Object result = value.getValue();
 
-            if (result instanceof String || result instanceof Character) preparedStatement.setString(i, result.toString());
-            if (result instanceof Integer) preparedStatement.setInt(i, (Integer) result);
-            if (result instanceof Boolean) preparedStatement.setBoolean(i, (Boolean) result);
-            if (result instanceof Float) preparedStatement.setFloat(i, (Float) result);
-            if (result instanceof Long) preparedStatement.setLong(i, (Long) result);
-            if (result == null || (result instanceof String && ((String) result).isEmpty())) preparedStatement.setNull(i, preparedStatement.getParameterMetaData().getParameterType(i));
+            if (result instanceof String || result instanceof Character) preparedStatement.setString(index, result.toString());
+            if (result instanceof Integer) preparedStatement.setInt(index, (Integer) result);
+            if (result instanceof Boolean) preparedStatement.setBoolean(index, (Boolean) result);
+            if (result instanceof Float) preparedStatement.setFloat(index, (Float) result);
+            if (result instanceof Long) preparedStatement.setLong(index, (Long) result);
+            if (result == null || (result instanceof String && ((String) result).isEmpty())) preparedStatement.setNull(index, preparedStatement.getParameterMetaData().getParameterType(index));
+
+            System.out.println("Index is " + index + " and result " + result);
         }
     }
 }

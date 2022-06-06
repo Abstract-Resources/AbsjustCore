@@ -10,6 +10,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public final class BukkitSender extends AbstractSender {
 
+    private final static UUID CONSOLE_UUID = UUID.nameUUIDFromBytes("AbsjustCore".getBytes());
+
     private final CommandSender sender;
 
     @Override
@@ -18,7 +20,7 @@ public final class BukkitSender extends AbstractSender {
     }
 
     public UUID getUniqueId() {
-        return this.sender instanceof Player ? ((Player) this.sender).getUniqueId() : null;
+        return this.sender instanceof Player ? ((Player) this.sender).getUniqueId() : CONSOLE_UUID;
     }
 
     @Override

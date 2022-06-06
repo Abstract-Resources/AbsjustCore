@@ -2,6 +2,7 @@ package dev.absjustcore.command;
 
 import dev.absjustcore.sender.AbstractSender;
 
+import java.util.Arrays;
 import java.util.Set;
 
 public abstract class AbstractParentCommand<T> extends AbstractArgument<Void> {
@@ -49,7 +50,7 @@ public abstract class AbstractParentCommand<T> extends AbstractArgument<Void> {
             }
         }
 
-        argument.execute(sender, commandLabel, argumentLabel, target, args);
+        argument.execute(sender, commandLabel, argumentLabel, target, this.type == Type.TAKES_ARGUMENT_FOR_TARGET ? Arrays.copyOfRange(args, this.type.minArgs, args.length) : args);
     }
 
     private void sendUsage(AbstractSender sender) {
@@ -59,9 +60,9 @@ public abstract class AbstractParentCommand<T> extends AbstractArgument<Void> {
     protected abstract T getTarget(AbstractSender sender, String targetParsed);
 
     public enum Type {
-        // e.g. /lp log sub-command....
+        // e.g. /ca log sub-command....
         NO_TARGET_ARGUMENT(0),
-        // e.g. /lp user <USER> sub-command....
+        // e.g. /ca group <GROUP> sub-command....
         TAKES_ARGUMENT_FOR_TARGET(1);
 
         private final int cmdIndex;

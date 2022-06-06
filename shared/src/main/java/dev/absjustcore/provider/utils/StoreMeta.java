@@ -5,31 +5,57 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@RequiredArgsConstructor (access = AccessLevel.PRIVATE) @Getter
+@RequiredArgsConstructor (access = AccessLevel.PRIVATE)
 public final class StoreMeta {
 
-    private final String collection;
-    private final String statement;
+    @Getter private final String collection;
+    @Getter private final String statement;
 
-    private final Map<String, Object> values;
+    private final Set<StoreValue> values;
+
+    public Map<String, Object> values() {
+        Map<String, Object> map = new HashMap<>();
+
+        for (StoreValue storeValue : this.values.stream()
+                .sorted(Comparator.comparingInt(StoreValue::getId))
+                .collect(Collectors.toList())
+        ) {
+            map.put(storeValue.getKey(), storeValue.getValue());
+        }
+
+        return map;
+    }
+
+    public Set<StoreValue> listValues() {
+        return this.values;
+    }
 
     public @NonNull Map<String, Object> fetchFirstValues(int limit) {
         Map<String, Object> copy = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : this.values.entrySet()) {
+        for (StoreValue value : this.values) {
             if (copy.size() == limit) break;
 
-            copy.put(entry.getKey(), entry.getValue());
+            copy.put(value.getKey(), value.getValue());
         }
 
         return copy;
     }
 
     public String fetchString(String key) {
-        return this.values.get(key).toString();
+        StoreValue storeValue = this.values.stream()
+                .filter(value -> value.getKey().equalsIgnoreCase(key))
+                .findFirst().orElse(null);
+
+        if (storeValue == null) {
+            throw new RuntimeException("SQL Value for " + key + " not found...");
+        }
+
+        return (String) storeValue.getValue();
     }
 
     public void invalidate() {
@@ -45,7 +71,7 @@ public final class StoreMeta {
         private String collection;
         private String statement;
 
-        private final Map<String, Object> values = new HashMap<>();
+        private final Set<StoreValue> values = new HashSet<>();
 
         public Builder collection(String collection) {
             this.collection = collection;
@@ -60,7 +86,15 @@ public final class StoreMeta {
         }
 
         public Builder append(String key, Object value) {
-            this.values.put(key, value);
+            return this.append(-1, key, value);
+        }
+
+        public Builder append(int id, String key, Object value) {
+            return this.append(StoreValue.builder().id(id).key(key).value(value).build());
+        }
+
+        public Builder append(StoreValue value) {
+            this.values.add(value);
 
             return this;
         }
