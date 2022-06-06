@@ -59,6 +59,18 @@ public final class MetaData {
         return Collections.unmodifiableSet(this.suffixes);
     }
 
+    public boolean findPrefix(String prefix) {
+
+    }
+
+    public boolean findSuffix(String suffix) {
+
+    }
+
+    public void recalculate() {
+
+    }
+
     public static MetaData empty() {
         return new MetaData(
                 null,

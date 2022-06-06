@@ -1,0 +1,21 @@
+provider: mysql
+
+mysql:
+  address: 127.0.0.1
+  username: root
+  password: ""
+  dbname: "absjustcore"
+
+mongodb:
+  address: 127.0.0.1
+  username: root
+  password: ""
+  dbname: "absjustcore"
+
+log:
+  store: false
+  notify-remote: true
+
+contexts:
+  - server
+  - world

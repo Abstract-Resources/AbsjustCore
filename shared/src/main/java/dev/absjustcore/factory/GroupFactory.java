@@ -18,6 +18,8 @@ public final class GroupFactory {
 
     @Getter private final static GroupFactory instance = new GroupFactory();
 
+    private final Set<Group> groups = new HashSet<>();
+
     public void init() {
         LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("groups")
@@ -41,11 +43,19 @@ public final class GroupFactory {
     }
 
     public void setGroup(Group group) {
+        this.groups.add(group);
+    }
 
+    public Group getGroup(String name) {
+        return this.groups.stream()
+                .filter(group -> group.getName().equalsIgnoreCase(name))
+                .findAny().orElse(null);
     }
 
     public @Nullable Group storeGroup(@NonNull String name, int priority) {
         int id = AbsjustPlugin.getProvider().storeAndFetch(StoreMeta.builder()
+                .collection("groups")
+                .statement("GROUP_INSERT")
                 .append("name", name)
                 .append("priority", priority)
                 .build()

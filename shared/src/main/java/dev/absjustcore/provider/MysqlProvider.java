@@ -96,6 +96,10 @@ public final class MysqlProvider implements Provider {
         }
     }
 
+    public void storeAsync(StoreMeta storeMeta) {
+
+    }
+
     public int storeAndFetch(StoreMeta storeMeta) {
         if (this.disconnected()) return this.reconnect() ? this.storeAndFetch(storeMeta) : -1;
 
