@@ -1,0 +1,9 @@
+name: AbsjustCore
+author: Abstract
+version: 1.0.0
+main: dev.absjustcore.BukkitPlugin
+
+commands:
+  coreadmin:
+    description: AbsjustCore admin command management
+    aliases: ["ca"]

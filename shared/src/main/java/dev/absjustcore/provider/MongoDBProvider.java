@@ -5,9 +5,12 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import dev.absjustcore.AbsjustPlugin;
+import dev.absjustcore.TaskUtils;
 import dev.absjustcore.provider.utils.LocalResultSet;
 import dev.absjustcore.provider.utils.StoreMeta;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,9 +42,11 @@ public final class MongoDBProvider implements Provider {
 
         MongoDatabase database = this.client.getDatabase(storeMeta.fetchString("dbname"));
 
-        for (String collectionName : new String[]{"players", "groups", "group_permissions"}) {
+        for (String collectionName : new String[]{"players", "groups", "permissions"}) {
             this.collectionsStored.put(collectionName, database.getCollection(collectionName));
         }
+
+        AbsjustPlugin.getLogger().info("Successfully initialized 'MongoDB' as database provider");
     }
 
     @Override
@@ -50,7 +55,15 @@ public final class MongoDBProvider implements Provider {
 
         if (collection == null) return;
 
-        collection.replaceOne(new Document(storeMeta.fetchFirstValues(1)), new Document(storeMeta.getValues()));
+        collection.replaceOne(
+                new Document(storeMeta.fetchFirstValues(1)),
+                new Document(storeMeta.getValues()).append("id", new ObjectId())
+        );
+    }
+
+    @Override
+    public void storeAsync(StoreMeta storeMeta) {
+        TaskUtils.runAsync(() -> this.store(storeMeta));
     }
 
     @Override
@@ -59,11 +72,14 @@ public final class MongoDBProvider implements Provider {
 
         if (collection == null) return -1;
 
-        Document document = new Document(storeMeta.getValues());
+        ObjectId targetObjectId = new ObjectId();
 
-        collection.replaceOne(new Document(storeMeta.fetchFirstValues(1)), document);
+        collection.replaceOne(
+                new Document(storeMeta.fetchFirstValues(1)),
+                new Document(storeMeta.getValues()).append("id", targetObjectId)
+        );
 
-        return document.getObjectId("_id").getTimestamp();
+        return targetObjectId.getTimestamp();
     }
 
     @Override

@@ -3,6 +3,7 @@ package dev.absjustcore.provider;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.absjustcore.AbsjustPlugin;
+import dev.absjustcore.TaskUtils;
 import dev.absjustcore.provider.utils.LocalResultSet;
 import dev.absjustcore.provider.utils.StoreMeta;
 import org.apache.logging.log4j.Level;
@@ -60,11 +61,15 @@ public final class MysqlProvider implements Provider {
             properties.load(inputStream);
 
             for (String k : properties.stringPropertyNames()) {
-                this.statements.put(k, properties.getProperty(k).replace("<prefix>", "absjustcore_"));
+                this.statements.put(k, properties.getProperty(k).replace("<prefix>", "absjustcore"));
+
+                if (k.endsWith("_CREATE")) this.storeAsync(StoreMeta.builder().statement(k).build());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        AbsjustPlugin.getLogger().info("Successfully initialized 'MySQL' as database provider");
     }
 
     @Override
@@ -97,7 +102,7 @@ public final class MysqlProvider implements Provider {
     }
 
     public void storeAsync(StoreMeta storeMeta) {
-
+        TaskUtils.runAsync(() -> this.store(storeMeta));
     }
 
     public int storeAndFetch(StoreMeta storeMeta) {
@@ -176,6 +181,8 @@ public final class MysqlProvider implements Provider {
             AbsjustPlugin.getLogger().log(Level.FATAL, "Can't reconnect because, reason: {}", e.getMessage());
 
             return false;
+        } finally {
+            AbsjustPlugin.getLogger().info("Successfully reconnected");
         }
 
         return true;

@@ -1,6 +1,7 @@
 package dev.absjustcore.factory;
 
 import dev.absjustcore.AbsjustPlugin;
+import dev.absjustcore.actionlog.LoggedAction;
 import dev.absjustcore.object.Group;
 import dev.absjustcore.object.MetaData;
 import dev.absjustcore.object.Permission;
@@ -11,6 +12,7 @@ import lombok.NonNull;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +25,7 @@ public final class GroupFactory {
     public void init() {
         LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
                 .collection("groups")
-                .statement("GROUPS_SELECT_ALL")
+                .statement("GROUP_SELECT_ALL")
                 .build()
         );
 
@@ -93,11 +95,73 @@ public final class GroupFactory {
         }
     }
 
-    private @NonNull MetaData getMetaData(int id) {
-        return MetaData.empty();
+    public void storeMetaData(int targetId, LoggedAction.Type type, String context, String value) {
+        AbsjustPlugin.getProvider().storeAsync(StoreMeta.builder()
+                .collection("node_meta")
+                .statement("NODE_META_INSERT")
+                .append("targetId", targetId)
+                .append("type", type)
+                .append("context", context)
+                .append("value", value)
+                .append("created_at", Instant.now().getEpochSecond())
+                .build()
+        );
     }
 
-    public @NonNull Set<Permission> getPermissions(int id) {
-        return null;
+    private @NonNull MetaData getMetaData(int targetId) {
+        LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
+                .collection("node_meta")
+                .statement("NODE_META_SELECT_ALL_BY_TARGET_ID")
+                .append("targetId", targetId)
+                .build()
+        );
+
+        if (resultSet == null || !resultSet.next()) {
+            return MetaData.empty();
+        }
+
+        Set<String> prefixes = new HashSet<>();
+        Set<String> suffixes = new HashSet<>();
+
+        while (resultSet.next()) {
+            String context = resultSet.fetchString("context");
+            String value = resultSet.fetchString("value");
+
+            if (context.equalsIgnoreCase("prefix")) {
+                prefixes.add(value);
+            } else {
+                suffixes.add(value);
+            }
+        }
+
+        resultSet.invalidate();
+
+        return new MetaData(
+                prefixes.stream().findFirst().orElse(null),
+                suffixes.stream().findFirst().orElse(null),
+                prefixes,
+                suffixes
+        );
+    }
+
+    public @NonNull Set<Permission> getPermissions(int targetId) {
+        LocalResultSet resultSet = AbsjustPlugin.getProvider().fetch(StoreMeta.builder()
+                .collection("permissions")
+                .statement("PERMISSIONS_SELECT_ALL")
+                .append("targetId", targetId)
+                .build()
+        );
+
+        if (resultSet == null) return new HashSet<>();
+
+        Set<Permission> permissions = new HashSet<>();
+
+        while (resultSet.next()) {
+            permissions.add(Permission.fromResult(resultSet));
+        }
+
+        resultSet.invalidate();
+
+        return permissions;
     }
 }

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -60,11 +61,11 @@ public final class MetaData {
     }
 
     public boolean findPrefix(String prefix) {
-
+        return this.prefixes.contains(prefix) || Objects.equals(this.prefix, prefix);
     }
 
     public boolean findSuffix(String suffix) {
-
+        return this.suffixes.contains(suffix) || Objects.equals(this.suffix, suffix);
     }
 
     public void recalculate() {

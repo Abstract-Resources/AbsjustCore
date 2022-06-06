@@ -9,6 +9,8 @@ public interface Provider {
 
     void store(StoreMeta storeMeta);
 
+    void storeAsync(StoreMeta storeMeta);
+
     int storeAndFetch(StoreMeta storeMeta);
 
     LocalResultSet fetch(StoreMeta storeMeta);

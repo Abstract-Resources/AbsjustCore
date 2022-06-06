@@ -9,6 +9,7 @@ import dev.absjustcore.provider.utils.StoreMeta;
 import dev.absjustcore.sender.AbstractSender;
 import dev.absjustcore.sender.BukkitSender;
 import lombok.Getter;
+import org.apache.logging.log4j.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
@@ -29,7 +30,6 @@ public final class BukkitPlugin extends JavaPlugin {
         instance = this;
 
         this.saveDefaultConfig();
-        this.saveResource("hikari.properties", false);
 
         this.consoleSender = new BukkitSender(Bukkit.getConsoleSender());
 
@@ -52,9 +52,16 @@ public final class BukkitPlugin extends JavaPlugin {
             return;
         }
 
-        ConfigurationSection section = configuration.getConfigurationSection(providerName.toUpperCase());
+        ConfigurationSection section = configuration.getConfigurationSection(providerName.toLowerCase());
+
+        if (section == null) {
+            AbsjustPlugin.getLogger().log(Level.ERROR, "An error occurred when tried get the Provider section");
+
+            return;
+        }
 
         Provider provider = providerName.equalsIgnoreCase("mysql") ? new MysqlProvider() : new MongoDBProvider();
+
         provider.init(StoreMeta.builder()
                 .append("address", section.getString("address"))
                 .append("password", section.getString("password"))
