@@ -14,7 +14,7 @@ public final class LogManager {
 
     public void broadcast(@NonNull LoggedAction entry, @NonNull AbstractSender sender) {
         if (AbsjustPlugin.getInstance().storeLog()) {
-            AbsjustPlugin.getProvider().storeAndFetch(StoreMeta.builder()
+            AbsjustPlugin.getProvider().storeAsync(StoreMeta.builder()
                     .collection("group_logs")
                     .statement("LOGS_INSERT")
                     .append(1, "timestamp", entry.getTimestamp())

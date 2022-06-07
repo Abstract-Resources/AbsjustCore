@@ -96,7 +96,7 @@ public final class GroupFactory {
     }
 
     public void storeMetaData(int targetId, LoggedAction.Type type, String context, String value) {
-        AbsjustPlugin.getProvider().storeAsync(StoreMeta.builder()
+        AbsjustPlugin.getProvider().store(StoreMeta.builder()
                 .collection("node_meta")
                 .statement("NODE_META_INSERT")
                 .append(1, "targetId", targetId)
@@ -104,6 +104,16 @@ public final class GroupFactory {
                 .append(3, "context", context)
                 .append(4, "value", value)
                 .append(5, "created_at", Instant.now().getEpochSecond())
+                .build()
+        );
+    }
+
+    public void deleteMetaData(int targetId, String context) {
+        AbsjustPlugin.getProvider().store(StoreMeta.builder()
+                .collection("node_meta")
+                .statement("NODE_META_DELETE_ALL_BY_CONTEXT")
+                .append(1, "targetId", targetId)
+                .append(2, "context", context)
                 .build()
         );
     }

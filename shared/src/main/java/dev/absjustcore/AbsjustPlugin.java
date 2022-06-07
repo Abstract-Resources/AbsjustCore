@@ -3,10 +3,12 @@ package dev.absjustcore;
 import dev.absjustcore.provider.Provider;
 import dev.absjustcore.sender.AbstractSender;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
@@ -17,8 +19,8 @@ public final class AbsjustPlugin {
 
     @Getter @Setter private static Provider provider;
 
-    @Setter private Callable<Boolean> futurePrimaryThread;
-    @Setter private Callable<Stream<AbstractSender>> futureOnlineSenders;
+    @Setter private @NonNull Callable<Boolean> futurePrimaryThread;
+    @Setter private @NonNull Callable<Stream<AbstractSender>> futureOnlineSenders;
 
     @Setter private boolean storeLog = false;
     @Setter private boolean logRemote = false;
@@ -31,7 +33,7 @@ public final class AbsjustPlugin {
         }
     }
 
-    public Stream<AbstractSender> getOnlineSenders() {
+    public @Nullable Stream<AbstractSender> getOnlineSenders() {
         try {
             return this.futureOnlineSenders.call();
         } catch (Exception e) {

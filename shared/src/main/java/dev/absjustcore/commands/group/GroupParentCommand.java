@@ -12,7 +12,9 @@ public final class GroupParentCommand extends AbstractParentCommand<Group> {
     public GroupParentCommand() {
         super("group", "absjustcore.group.command", Type.TAKES_ARGUMENT_FOR_TARGET, ImmutableSet.<AbstractArgument<Group>>builder()
                 .add(new SetPrefixArgument())
-                .build());
+                .add(new SetSuffixArgument())
+                .build()
+        );
     }
 
     @Override

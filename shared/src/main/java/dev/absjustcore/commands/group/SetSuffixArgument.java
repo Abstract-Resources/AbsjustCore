@@ -11,10 +11,10 @@ import dev.absjustcore.sender.AbstractSender;
 
 import java.util.Arrays;
 
-public final class SetPrefixArgument extends AbstractArgument<Group> {
+public final class SetSuffixArgument extends AbstractArgument<Group> {
 
-    public SetPrefixArgument() {
-        super("setprefix", "Set prefix", "absjustcore.group.setprefix", "/coreadmin group <group> setprefix <prefix>");
+    public SetSuffixArgument() {
+        super("setsuffix", "Set suffix", "absjustcore.group.setsuffix", "/coreadmin group <group> setsuffix <suffix>");
     }
 
     @Override
@@ -45,16 +45,16 @@ public final class SetPrefixArgument extends AbstractArgument<Group> {
             return;
         }
 
-        metaData.invalidatePrefix(args[0]);
+        metaData.invalidateSuffix(args[0]);
         metaData.recalculate();
 
         TaskUtils.runAsync(() -> {
-            GroupFactory.getInstance().deleteMetaData(group.getId(), "prefix");
+            GroupFactory.getInstance().deleteMetaData(group.getId(), "suffix");
 
             GroupFactory.getInstance().storeMetaData(
                     group.getId(),
                     LoggedAction.Type.GROUP,
-                    "prefix",
+                    "suffix",
                     args[0]
             );
         });
@@ -63,10 +63,9 @@ public final class SetPrefixArgument extends AbstractArgument<Group> {
                 .timestamp()
                 .source(sender).target(group)
                 .type(LoggedAction.Type.GROUP)
-                .action("setprefix", args[0])
+                .action("setsuffix", args[0])
                 .build(),
                 sender
         );
-        // TODO: Send log action
     }
 }
